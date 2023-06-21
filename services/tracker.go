@@ -173,3 +173,12 @@ func (s *TrackingService) GetHistoricPoolData(poolID uint) ([]models.PoolData, e
 
 	return poolData, nil
 }
+
+func (s *TrackingService) GetLatestBlock() (int64, error) {
+	header, err := s.client.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		return 0, err
+	}
+
+	return header.Number.Int64(), nil
+}

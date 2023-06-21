@@ -41,6 +41,7 @@ type TrackerConfig struct {
 	EthClientURL  string `json:"eth_client_url"`
 	PoolAddress   string `json:"pool_address"`
 	PauseDuration int    `json:"pause_duration"`
+	LogFrequency  int64  `json:"log_frequency"`
 }
 
 func loadConfig(filename string) (Config, error) {
@@ -127,10 +128,20 @@ func main() {
 
 	// Begin tracking the specified pool in a separate goroutine
 	go func() {
+		var lastFetchedBlock int64 = 0
 		for {
-			err := service.Tracker(config.TrackerConfig.PoolAddress)
+			latestBlock, err := service.GetLatestBlock()
 			if err != nil {
-				log.Error("Error encountered in Tracking:", err)
+				log.Error("Error encountered when getting latest block number:", err)
+			}
+
+			if latestBlock-lastFetchedBlock >= config.TrackerConfig.LogFrequency {
+				err := service.Tracker(config.TrackerConfig.PoolAddress)
+				if err != nil {
+					log.Error("Error encountered in Tracking:", err)
+				} else {
+					lastFetchedBlock = latestBlock
+				}
 			}
 			time.Sleep(time.Duration(config.TrackerConfig.PauseDuration) * time.Millisecond)
 		}
