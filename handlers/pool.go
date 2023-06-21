@@ -6,37 +6,6 @@ import (
 	"strconv"
 )
 
-//type PoolHandler struct {
-//	service *services.TrackingService
-//}
-//
-//func NewPoolHandler(service *services.TrackingService) *PoolHandler {
-//	return &PoolHandler{service: service}
-//}
-//
-//func (h *PoolHandler) PoolDataHandler(c *fiber.Ctx) error {
-//	poolAddress := c.Params("pool_id")
-//	block := c.Query("block", "latest")
-//
-//	poolData, err := h.service.GetPoolData(poolAddress, block)
-//	if err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-//	}
-//
-//	return c.JSON(poolData)
-//}
-//
-//func (h *PoolHandler) HistoricPoolDataHandler(c *fiber.Ctx) error {
-//	poolAddress := c.Params("pool_id")
-//
-//	poolData, err := h.service.GetHistoricPoolData(poolAddress)
-//	if err != nil {
-//		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-//	}
-//
-//	return c.JSON(poolData)
-//}
-
 type PoolHandler struct {
 	service *services.TrackingService
 }

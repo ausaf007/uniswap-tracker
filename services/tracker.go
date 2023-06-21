@@ -148,46 +148,6 @@ func (s *TrackingService) Tracker(poolAddress string) error {
 	return nil
 }
 
-func (s *TrackingService) GetPoolDataOld(poolAddress string, block string) (*models.PoolData, error) {
-	var pool models.Pool
-	s.db.First(&pool, models.Pool{PoolAddress: poolAddress})
-
-	if block == "latest" {
-		var poolData models.PoolData
-		result := s.db.Where("pool_id = ?", pool.ID).Order("block_number desc").First(&poolData)
-
-		if result.Error != nil {
-			return nil, result.Error
-		}
-
-		return &poolData, nil
-	} else {
-		var poolData models.PoolData
-		blockNumber, _ := strconv.ParseInt(block, 10, 64)
-		result := s.db.Where("pool_id = ? AND block_number <= ?", pool.ID, blockNumber).Order("block_number desc").First(&poolData)
-
-		if result.Error != nil {
-			return nil, result.Error
-		}
-
-		return &poolData, nil
-	}
-}
-
-func (s *TrackingService) GetHistoricPoolDataOld(poolAddress string) ([]models.PoolData, error) {
-	var pool models.Pool
-	s.db.First(&pool, models.Pool{PoolAddress: poolAddress})
-
-	var poolData []models.PoolData
-	result := s.db.Where("pool_id = ?", pool.ID).Order("block_number asc").Find(&poolData)
-
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return poolData, nil
-}
-
 func (s *TrackingService) GetPoolData(poolID uint, block string) (*models.PoolData, error) {
 	if block == "latest" {
 		var poolData models.PoolData
