@@ -60,7 +60,7 @@ Here are some details about the fields in the config file:
     ```
 8. In case you want to know the pool_id for all the pool addresses tracked:
     ```
-    curl -X GET "http://127.0.0.1:3000/v1/api/pool/mapping"
+    curl -X GET "http://127.0.0.1:3000/v1/api/pool_mapping"
     ```
 
 Thank you!
