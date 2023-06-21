@@ -149,7 +149,7 @@ func main() {
 
 	app.Get("/v1/api/pool/:pool_id", handler.PoolDataHandler)
 	app.Get("/v1/api/pool/:pool_id/historic", handler.HistoricPoolDataHandler)
-	app.Get("/v1/pool_mapping", handler.PoolMappingHandler)
+	app.Get("/v1/api/pool/mapping", handler.PoolMappingHandler)
 
 	app.Listen(":" + config.ServerConfig.Port)
 }
