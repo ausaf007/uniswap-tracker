@@ -98,7 +98,7 @@ func (s *TrackingService) Tracker(poolAddress string) error {
 
 	blockNumber, err := s.client.BlockNumber(context.Background())
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching most recent block: %v", err)
 	}
 
 	var poolModel models.Pool
@@ -114,14 +114,6 @@ func (s *TrackingService) Tracker(poolAddress string) error {
 		Tick:          strconv.FormatInt(tick.Int64(), 10),
 		BlockNumber:   int64(blockNumber),
 	}
-
-	//// TODO: To be removed:
-	//fmt.Println("-----Pool_Details-----")
-	//fmt.Println("token0Balance:", token0Balance.String())
-	//fmt.Println("token1Balance:", token1Balance.String())
-	//fmt.Println("Tick:", strconv.FormatInt(tick.Int64(), 10))
-	//fmt.Println("Block Number", int64(blockNumber))
-	//fmt.Println("-------------")
 
 	log.Info("Pool Details:", poolData)
 
@@ -154,7 +146,7 @@ func (s *TrackingService) GetPoolData(poolID uint, block string) (*models.PoolDa
 		result := s.db.Where("pool_id = ?", poolID).Order("block_number desc").First(&poolData)
 
 		if result.Error != nil {
-			return nil, result.Error
+			return nil, fmt.Errorf("error fetching latest block from DB: %v", result.Error)
 		}
 
 		return &poolData, nil
@@ -164,7 +156,7 @@ func (s *TrackingService) GetPoolData(poolID uint, block string) (*models.PoolDa
 		result := s.db.Where("pool_id = ? AND block_number <= ?", poolID, blockNumber).Order("block_number desc").First(&poolData)
 
 		if result.Error != nil {
-			return nil, result.Error
+			return nil, fmt.Errorf("error fetching block %d from DB: %v", blockNumber, result.Error)
 		}
 
 		return &poolData, nil
@@ -176,7 +168,7 @@ func (s *TrackingService) GetHistoricPoolData(poolID uint) ([]models.PoolData, e
 	result := s.db.Where("pool_id = ?", poolID).Order("block_number asc").Find(&poolData)
 
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, fmt.Errorf("error fetching historical data from DB: %v", result.Error)
 	}
 
 	return poolData, nil

@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"github.com/ausaf007/uniswap-tracker/database"
 	"github.com/ausaf007/uniswap-tracker/handlers"
 	"github.com/ausaf007/uniswap-tracker/services"
@@ -69,7 +68,7 @@ func gracefulShutdown(client *ethclient.Client) {
 	go func() {
 		<-sigs
 		client.Close()
-		fmt.Println("Uniswap Tracker stopped successfully.")
+		log.Info("Uniswap Tracker stopped successfully.")
 		os.Exit(0)
 	}()
 }
