@@ -118,13 +118,10 @@ func main() {
 
 	gracefulShutdown(ethClient)
 
-	app := fiber.New()
 	service, err := services.NewTrackingService(ethClient, db)
 	if err != nil {
 		log.Error("Failed to start NewTrackingService", err)
 	}
-
-	handler := handlers.NewPoolHandler(service)
 
 	// Begin tracking the specified pool in a separate goroutine
 	go func() {
@@ -147,6 +144,8 @@ func main() {
 		}
 	}()
 
+	app := fiber.New()
+	handler := handlers.NewPoolHandler(service)
 	app.Get("/v1/api/pool/:pool_id", handler.PoolDataHandler)
 	app.Get("/v1/api/pool/:pool_id/historic", handler.HistoricPoolDataHandler)
 	app.Get("/v1/api/pool_mapping", handler.PoolMappingHandler)
