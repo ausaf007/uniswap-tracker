@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"os"
 	"os/signal"
 	"time"
@@ -73,7 +74,23 @@ func gracefulShutdown(client *ethclient.Client) {
 	}()
 }
 
-// TODO: Remove log.Fatal, implement retries for ethclient and database
+func retry(op func() error, initialDelay time.Duration, maxDelay time.Duration, logger *log.Entry) {
+	backoffTime := initialDelay
+	for {
+		err := op()
+		if err == nil {
+			return
+		}
+
+		logger.Println("Operation failed, retrying in", backoffTime, ":", err)
+		time.Sleep(backoffTime)
+		backoffTime *= 2
+		if backoffTime > maxDelay {
+			backoffTime = maxDelay
+		}
+	}
+}
+
 func main() {
 	loadFlags()
 
@@ -83,16 +100,20 @@ func main() {
 	}
 
 	// Initialize Database
-	db, err := database.InitDatabase(config.ServerConfig.DatabaseName)
-	if err != nil {
-		log.Fatal("Failed to connect to the database:", err)
-	}
+	var db *gorm.DB
+	retry(func() error {
+		var err error
+		db, err = database.InitDatabase(config.ServerConfig.DatabaseName)
+		return err
+	}, time.Second*10, time.Minute*10, log.WithField("context", "DB Connection"))
 
 	// Create an ethclient.Client
-	ethClient, err := ethclient.Dial(config.TrackerConfig.EthClientURL)
-	if err != nil {
-		log.Fatal("Failed to connect to Ethereum client:", err)
-	}
+	var ethClient *ethclient.Client
+	retry(func() error {
+		var err error
+		ethClient, err = ethclient.Dial(config.TrackerConfig.EthClientURL)
+		return err
+	}, time.Second*10, time.Minute*10, log.WithField("context", "Eth Client Connection"))
 
 	gracefulShutdown(ethClient)
 
