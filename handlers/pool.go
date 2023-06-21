@@ -11,6 +11,22 @@ type PoolHandler struct {
 	service *services.TrackingService
 }
 
+type PoolDataResponse struct {
+	Token0Balance string `json:"token0Balance"`
+	Token1Balance string `json:"token1Balance"`
+	Tick          string `json:"tick"`
+}
+
+type HistoricPoolDataResponse struct {
+	Token0Balance string `json:"token0Balance"`
+	Token0Delta   string `json:"token0Delta"`
+	Token1Balance string `json:"token1Balance"`
+	Token1Delta   string `json:"token1Delta"`
+	BlockNumber   int64  `json:"blockNumber"`
+}
+
+type HistoricPoolDataResponseSlice []HistoricPoolDataResponse
+
 func NewPoolHandler(service *services.TrackingService) *PoolHandler {
 	return &PoolHandler{service: service}
 }
@@ -29,7 +45,13 @@ func (h *PoolHandler) PoolDataHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(poolData)
+	responseData := PoolDataResponse{
+		Token0Balance: poolData.Token0Balance,
+		Token1Balance: poolData.Token1Balance,
+		Tick:          poolData.Tick,
+	}
+
+	return c.JSON(responseData)
 }
 
 func (h *PoolHandler) HistoricPoolDataHandler(c *fiber.Ctx) error {
@@ -45,5 +67,26 @@ func (h *PoolHandler) HistoricPoolDataHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(poolData)
+	var responseData HistoricPoolDataResponseSlice
+	for _, pd := range poolData {
+		responseData = append(responseData, HistoricPoolDataResponse{
+			Token0Balance: pd.Token0Balance,
+			Token0Delta:   pd.Token0Delta,
+			Token1Balance: pd.Token1Balance,
+			Token1Delta:   pd.Token1Delta,
+			BlockNumber:   pd.BlockNumber,
+		})
+	}
+
+	return c.JSON(responseData)
+}
+
+func (h *PoolHandler) PoolMappingHandler(c *fiber.Ctx) error {
+	poolMap, err := h.service.GetPoolMapping()
+	if err != nil {
+		log.Error("Unable to fetch pool table data: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(poolMap)
 }

@@ -202,3 +202,18 @@ func (s *TrackingService) GetLatestBlock() (int64, error) {
 
 	return header.Number.Int64(), nil
 }
+
+func (s *TrackingService) GetPoolMapping() (map[string]string, error) {
+	var pools []models.Pool
+	result := s.db.Find(&pools)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	poolMap := make(map[string]string)
+	for _, pool := range pools {
+		poolMap[pool.PoolAddress] = strconv.FormatUint(uint64(pool.ID), 10)
+	}
+
+	return poolMap, nil
+}
