@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"math/big"
 	"strconv"
 
 	"context"
@@ -107,10 +108,27 @@ func (s *TrackingService) Tracker(poolAddress string) error {
 		return result.Error
 	}
 
+	var latestPoolData models.PoolData
+	s.db.Where("pool_id = ?", poolModel.ID).Order("block_number desc").First(&latestPoolData)
+
+	var token0Delta *big.Int
+	var token1Delta *big.Int
+	if latestPoolData.ID != 0 {
+		latestToken0Balance, _ := new(big.Int).SetString(latestPoolData.Token0Balance, 10)
+		latestToken1Balance, _ := new(big.Int).SetString(latestPoolData.Token1Balance, 10)
+		token0Delta = new(big.Int).Sub(token0Balance, latestToken0Balance)
+		token1Delta = new(big.Int).Sub(token1Balance, latestToken1Balance)
+	} else {
+		token0Delta = big.NewInt(0)
+		token1Delta = big.NewInt(0)
+	}
+
 	poolData := &models.PoolData{
 		PoolID:        poolModel.ID,
 		Token0Balance: token0Balance.String(),
 		Token1Balance: token1Balance.String(),
+		Token0Delta:   token0Delta.String(),
+		Token1Delta:   token1Delta.String(),
 		Tick:          strconv.FormatInt(tick.Int64(), 10),
 		BlockNumber:   int64(blockNumber),
 	}
@@ -134,6 +152,8 @@ func (s *TrackingService) Tracker(poolAddress string) error {
 		s.db.Model(&existingData).Updates(models.PoolData{
 			Token0Balance: poolData.Token0Balance,
 			Token1Balance: poolData.Token1Balance,
+			Token0Delta:   poolData.Token0Delta,
+			Token1Delta:   poolData.Token1Delta,
 			Tick:          poolData.Tick,
 		})
 	}

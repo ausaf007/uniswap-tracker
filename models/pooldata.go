@@ -9,4 +9,6 @@ type PoolData struct {
 	Token0Balance string `gorm:"type:text;"`
 	Token1Balance string `gorm:"type:text;"`
 	Tick          string `gorm:"type:text;"`
+	Token0Delta   string `gorm:"type:text;"`
+	Token1Delta   string `gorm:"type:text;"`
 }
