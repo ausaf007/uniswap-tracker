@@ -15,11 +15,12 @@
 
 ## About The Project
 
-Monitoring service for Uniswap V3 pools that continuously tracks and logs essential data points, stores them in a persistent datastore, and provides access to the data through a REST endpoint.
+Monitoring service for Uniswap V3 pools that continuously tracks and logs essential data points with go-ethereum, stores them in a persistent datastore (sqlite3), and provides access to the data through a REST endpoint.
 
 ## Tech Stack
 
 [![](https://img.shields.io/badge/Built_with-Go-green?style=for-the-badge&logo=Go)](https://go.dev/)
+[![](https://img.shields.io/badge/Built_with-sqlite-blue?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
 
 ## Prerequisites
 
